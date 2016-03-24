@@ -13,6 +13,41 @@ void get_pixel_color (Display *d, int x, int y, XColor *color)
 
 }
 
+
+/* Find the point with the least error */
+const char *reverse_lookup_color(XColor color)
+{ 
+    int i;
+    int found = -1;
+    int error, min_error, rerror, gerror, berror;
+
+
+    min_error = 10000;
+    for (i = 0; i < NUMBER_OF_COLORS; i++) {
+
+        rerror = (color.red & 0xff) - COLOR_VALUES[i][0];
+        rerror *= rerror;
+
+        gerror = (color.green & 0xff) - COLOR_VALUES[i][1];
+        gerror *= gerror;
+
+        berror = (color.blue & 0xff) - COLOR_VALUES[i][2];
+        berror *= berror;
+
+        error = rerror + gerror + berror;
+        if (error < min_error) {
+            min_error = error;
+            found = i;
+        }
+
+    }
+
+    if (found != -1)
+        return COLOR_NAMES[found];
+    return NULL;
+
+}
+
 int main(int argc, char **argv)
 {
 
@@ -37,7 +72,8 @@ int main(int argc, char **argv)
     ret = XQueryPointer(display, window, &root_return, &child_return, &rootx,
             &rooty, &winx, &winy, &mask);
     get_pixel_color (display, rootx, rooty, &c);
-    printf("[%x] r:%x g:%x b:%x\n", ret, c.red, c.green, c.blue);
+
+    printf("%s\n", reverse_lookup_color(c));
 
     return 0;
 }
